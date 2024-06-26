@@ -112,10 +112,17 @@ const _NewBlock = styled.span(({ theme }) => ({
     fontSize: '9px'
 }));
 
+const fruitSalad = 'obviously';
+
 const url =
     'https://chrome.google.com/webstore/detail/net-logs/cjdmhjppaehhblekcplokfdhikmalnaf';
 export const Empty: FC = () => {
     const modifierKey = isMacOs() ? '⌘' : 'Ctrl';
+
+    if (fruitSalad) {
+        return <FruitSalad />;
+    }
+
     return (
         <Section>
             <NoItemsLine>👀 {i18n.t('noItems')} 👀</NoItemsLine>
@@ -127,7 +134,7 @@ export const Empty: FC = () => {
                     </p>
                     <p>
                         {i18n.t('clearLog')}: <kbd>{modifierKey}</kbd>+
-                        <kbd>L</kbd>
+                        <kbd>K</kbd>
                     </p>
                     <p>
                         {i18n.t('toggleUnrelated')}: <kbd>{modifierKey}</kbd>+
@@ -173,3 +180,110 @@ export const Empty: FC = () => {
         </Section>
     );
 };
+
+const fruitChoices = [
+    '🍇',
+    '🫐',
+    '🍓',
+    '🍌',
+    '🥝',
+    '🍈',
+    '🍉',
+    '🍊',
+    '🍋',
+    '🍍',
+    '🥭',
+    '🍎',
+    '🍏',
+    '🍑',
+    '🍐',
+    '🍒',
+    '🥥'
+] as const;
+const timeout = 2000;
+const maxFruit = 10;
+
+const FruitSalad = () => {
+    const [fruit, setFruit] = React.useState<
+        Array<(typeof fruitChoices)[number]>
+    >([]);
+    const directionRef = React.useRef(1);
+    const changeFruit = React.useCallback(
+        (e: React.MouseEvent<HTMLSpanElement>) => {
+            const fruitIndex = e.currentTarget.getAttribute('data-index');
+            if (fruitIndex) {
+                setFruit((f) =>
+                    f.map((cf, i) =>
+                        i === Number(fruitIndex) ? getFruit() : cf
+                    )
+                );
+            }
+        },
+        []
+    );
+    React.useEffect(() => {
+        const i = setInterval(() => {
+            setFruit((f) => {
+                if (
+                    (directionRef.current > 0 && f.length === maxFruit) ||
+                    (directionRef.current < 0 && f.length === 0)
+                ) {
+                    directionRef.current *= -1;
+                }
+
+                if (directionRef.current < 0) {
+                    return f.slice(0, f.length - 1);
+                } else {
+                    return [...f, getFruit()];
+                }
+            });
+        }, timeout);
+
+        return () => clearInterval(i);
+    }, []);
+    return (
+        <section>
+            {fruit.map((f, i) => (
+                <Fruit
+                    key={i}
+                    fruit={f}
+                    isLast={i === fruit.length - 1}
+                    index={i}
+                    onClick={changeFruit}
+                />
+            ))}
+        </section>
+    );
+};
+
+const Fruit = ({
+    fruit,
+    isLast,
+    index,
+    onClick
+}: {
+    index: number;
+    fruit: (typeof fruitChoices)[number];
+    isLast: boolean;
+    onClick: (e: React.MouseEvent<HTMLSpanElement>) => void;
+}) => (
+    <span
+        data-index={index}
+        style={{
+            position: 'fixed',
+            top: Math.random() * window.innerHeight,
+            left: Math.random() * window.innerWidth,
+            transform: `rotate(${Math.random() * 360}deg)`,
+            fontSize: isLast ? 0 : Math.max(Math.random() * 100),
+            transition: `all ${timeout}ms`,
+            cursor: 'pointer',
+            userSelect: 'none'
+        }}
+        onClick={onClick}>
+        {fruit}
+    </span>
+);
+
+function getFruit() {
+    return fruitChoices[Math.floor(Math.random() * fruitChoices.length)];
+}

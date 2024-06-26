@@ -14,7 +14,7 @@ callParent('onIframeReady').then(() => {
 const F5_CODE = 'F5';
 const F_CODE = 'KeyF';
 const U_CODE = 'KeyU';
-const L_CODE = 'KeyL';
+const K_CODE = 'KeyK';
 const P_CODE = 'KeyP';
 
 // Since we are in iframe, F5 event for inspected page should be hoisted manually
@@ -44,7 +44,7 @@ document.addEventListener('keydown', (e) => {
                 hotkeyType = 'toggleHideUnrelated';
             }
             break;
-        case L_CODE:
+        case K_CODE:
             if (isModifierPressed) {
                 window.postMessage({ type: 'clearList' }, '*');
                 hotkeyType = 'clearList';

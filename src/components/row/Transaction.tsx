@@ -2,9 +2,10 @@ import React, { FC, ReactNode } from 'react';
 import { TransactionItemAbstract } from 'models/TransactionItem';
 import { mediaQuerySmallOnly, nameTrimmer } from 'utils';
 import { Response } from '../Response';
-import { InspectorWrapper } from '../InspectorWrapper';
+import { InspectorWrapper, InspectorWrapperProps } from '../InspectorWrapper';
 import { Name } from './Name';
 import styled from '@emotion/styled';
+import { isBatchedGraphqlParams } from 'controllers/settings/profiles/graphql';
 
 interface ITransactionProps {
     className?: string;
@@ -61,7 +62,10 @@ export const Transaction: FC<ITransactionProps> = ({
     date,
     tag
 }) => {
-    const name = nameTrimmer(item.getName());
+    const params = item.getParams();
+    const name = isBatchedGraphqlParams(params)
+        ? 'Batched Request'
+        : nameTrimmer(item.getName());
     return (
         <>
             {date}
@@ -70,10 +74,32 @@ export const Transaction: FC<ITransactionProps> = ({
                 <Name value={name} />
             </NameContainer>
             <ParamsContainer className={className}>
-                <InspectorWrapper data={item.getParams()} tagName='params' />
+                <ParamsSpreader data={params} tagName='params' />
             </ParamsContainer>
             <ResponseStyled item={item} className={className} />
         </>
     );
 };
 Transaction.displayName = 'TransactionRow';
+
+const ParamsSpreader: React.FC<InspectorWrapperProps> = ({ data, tagName }) => {
+    if (!data) {
+        return null;
+    }
+
+    if (isBatchedGraphqlParams(data)) {
+        return (
+            <>
+                {data.graphqlBatch.map((item) => (
+                    <InspectorWrapper
+                        key={item.query}
+                        data={item}
+                        tagName={tagName}
+                    />
+                ))}
+            </>
+        );
+    }
+
+    return <InspectorWrapper data={data} tagName={tagName} />;
+};

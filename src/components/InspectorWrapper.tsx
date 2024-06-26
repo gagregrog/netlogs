@@ -2,7 +2,8 @@ import React, { FC, useMemo } from 'react';
 import Inspector, {
     chromeDark,
     chromeLight,
-    DOMInspector
+    DOMInspector,
+    InspectorTheme
 } from 'react-inspector';
 import { Image } from './render/Image';
 import { useListStore } from 'controllers/network';
@@ -177,14 +178,60 @@ export const InspectorWrapper: FC<InspectorWrapperProps> = ({
     }
     const name = tagName || (isMimeType(data) && data.__mimeType) || 'result';
     const unwrappedData = isMimeType(data) ? data.__getRaw() : data;
-    const unwrappedDataWithTextConverted = isUnpack
-        ? recursiveTextToObject(unwrappedData)
-        : unwrappedData;
+    if (Array.isArray(unwrappedData)) {
+        return unwrappedData.map((item, index) => (
+            <InspectorDenestor
+                key={index}
+                isUnpack={isUnpack}
+                name={name}
+                data={item}
+                theme={customTheme}
+            />
+        ));
+    }
+
     return (
-        <Inspector
+        <InspectorDenestor
+            isUnpack={isUnpack}
             name={name}
-            data={unwrappedDataWithTextConverted}
+            data={unwrappedData}
             theme={customTheme}
         />
     );
 };
+
+function overrideName(name: string, data: unknown): string {
+    if (data && typeof data === 'object' && Object.keys(data).length === 1) {
+        return Object.keys(data)[0];
+    }
+
+    return name;
+}
+
+const InspectorDenestor: React.FC<{
+    name: string;
+    data: unknown;
+    theme: InspectorTheme;
+    isUnpack: boolean;
+}> = ({ name, data, theme, isUnpack }) => {
+    const unwrappedDataWithTextConverted = isUnpack
+        ? recursiveTextToObject(data)
+        : data;
+    const overriddenName = overrideName(name, unwrappedDataWithTextConverted);
+    const denestedData = denestData(
+        overriddenName,
+        unwrappedDataWithTextConverted
+    );
+    return (
+        <Inspector name={overriddenName} data={denestedData} theme={theme} />
+    );
+};
+
+function denestData<T>(possibleProperty: string, data: T): T | unknown {
+    if (typeof data === 'object' && data !== null) {
+        if (Object.keys(data).length === 1 && possibleProperty in data) {
+            return (data as Record<string, unknown>)[possibleProperty];
+        }
+    }
+    return data;
+}
