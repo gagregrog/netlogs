@@ -76,7 +76,7 @@ export const graphqlProfile: IProfile = {
                 }
             } else if (isBatchedGraphqlResult(wrapper)) {
                 const allData: unknown[] = [];
-                const allErrors = [];
+                const allErrors: unknown[] = [];
                 wrapper.forEach(({ data, errors }) => {
                     if (errors) {
                         allErrors.push(errors);
@@ -86,6 +86,11 @@ export const graphqlProfile: IProfile = {
                 });
                 if (allErrors.length === 0) {
                     returnValue = allData;
+                } else {
+                    returnValue = {
+                        data: allData,
+                        errors: allErrors
+                    };
                 }
             }
             return returnValue;
