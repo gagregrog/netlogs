@@ -1,5 +1,9 @@
 import { isExtension } from 'utils';
-import secrets from '../secrets.json';
+// import secrets from '../secrets.json';
+const secrets = {
+    measurement_id: null,
+    api_secret: null
+};
 
 const GA_ENDPOINT = 'https://www.google-analytics.com/mp/collect';
 const GA_DEBUG_ENDPOINT = 'https://www.google-analytics.com/debug/mp/collect';
@@ -24,7 +28,7 @@ class Analytics {
 
     constructor(debug = false, noSend = false) {
         this.debug = debug;
-        this.noSend = noSend;
+        this.noSend = noSend || !MEASUREMENT_ID || !API_SECRET;
         this.checkNewUser();
     }
 
