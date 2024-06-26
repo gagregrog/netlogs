@@ -16,7 +16,7 @@
         "build:analyze:treemap": "cross-env ANALYZE=treemap yarn run build",
         "build:analyze:sunburst": "cross-env ANALYZE=sunburst yarn run build",
         "build:analyze:network": "cross-env ANALYZE=network yarn run build",
-        "build:watch": "vite build --watch",
+        "build:watch": "NODE_ENV=development vite build --watch",
         "package": "yarn run build:prod && tar -C dist -caf netlogs.zip *",
         "site": "vite serve dist",
         "storybook": "yarn ladle serve",
