@@ -14,6 +14,7 @@ export type Theme = {
     borderColor: string;
     accent: string;
     graphql: string;
+    batch_graphql: string;
     phoenixLiveView: string;
     oddRowBg: string;
     inactiveTag: string;

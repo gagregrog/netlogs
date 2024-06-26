@@ -35,7 +35,11 @@ export const graphqlProfile: IProfile = {
             }
             return name;
         },
-        getTag(): string {
+        getTag(request: NetworkRequest): string {
+            const params = this.getParams(request);
+            if (isBatchedGraphqlParams(params)) {
+                return 'BGQL';
+            }
             return 'GQL';
         },
         getParams: defaultProfile.functions.getParams,
@@ -70,6 +74,19 @@ export const graphqlProfile: IProfile = {
                         returnValue = wrapper.data;
                     }
                 }
+            } else if (isBatchedGraphqlResult(wrapper)) {
+                const allData: unknown[] = [];
+                const allErrors = [];
+                wrapper.forEach(({ data, errors }) => {
+                    if (errors) {
+                        allErrors.push(errors);
+                    } else {
+                        allData.push(data);
+                    }
+                });
+                if (allErrors.length === 0) {
+                    returnValue = allData;
+                }
             }
             return returnValue;
         }
@@ -81,6 +98,10 @@ type graphqlParams = {
     query: string;
     operationName?: string;
     variables?: Record<string, unknown>;
+};
+
+export type batchGraphqlParams = {
+    graphqlBatch: graphqlParams[];
 };
 
 type graphqlResult = {
@@ -127,12 +148,28 @@ function isGraphqlResult(
     );
 }
 
+function isBatchedGraphqlResult(
+    result: Record<string, unknown> | unknown
+): result is graphqlResult[] {
+    return Array.isArray(result) && result.every(isGraphqlResult);
+}
+
+export function isBatchedGraphqlParams(
+    params: Record<string, unknown> | unknown
+): params is batchGraphqlParams {
+    if (!params) {
+        return false;
+    }
+    return (params as batchGraphqlParams).graphqlBatch?.every(isGraphqlParams);
+}
+
 export function isGraphql(
     params: Record<string, unknown>,
     _result: unknown,
     resultText?: string
 ): boolean {
     return (
+        isBatchedGraphqlParams(params) ||
         isGraphqlParams(params) ||
         (isGraphqlParamsWeak(params) &&
             (isGraphqlResultWeak(resultText) || !resultText))

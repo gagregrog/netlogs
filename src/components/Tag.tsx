@@ -17,7 +17,7 @@ const Container = styled.div<{ active: boolean }>(
         userSelect: 'none',
         ...(active
             ? {
-                  color: google.base07,
+                  color: 'black',
                   backgroundColor: color || google.base03
               }
             : {
@@ -45,6 +45,9 @@ function getColor(
     if (['GQL'].includes(content) && !color) {
         return theme.graphql;
     }
+    if (['BGQL'].includes(content) && !color) {
+        return theme.batch_graphql;
+    }
     if (content.includes('LV') && !color) {
         return theme.phoenixLiveView;
     }
@@ -66,7 +69,14 @@ export const Tag: React.FC<TProps> = ({
     const computedColor = getColor(color, content, type);
     return (
         <Container active={active} color={computedColor}>
-            {content}
+            {cleanTag(content)}
         </Container>
     );
 };
+
+function cleanTag(tag: string): string {
+    if (tag === 'BGQL') {
+        return 'GQL';
+    }
+    return tag;
+}

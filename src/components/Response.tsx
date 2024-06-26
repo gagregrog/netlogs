@@ -12,7 +12,7 @@ export const Response: React.FC<{
             {typeof data === 'string' ? (
                 <div>{data}</div>
             ) : (
-                <InspectorWrapper data={item.getContent()} />
+                <InspectorWrapper data={data} />
             )}
         </div>
     );

@@ -27,6 +27,11 @@ export const defaultProfile: IProfile = {
                 if (postData.text) {
                     try {
                         params = JSON.parse(postData.text);
+                        if (method === 'POST' && Array.isArray(params)) {
+                            params = {
+                                graphqlBatch: params
+                            };
+                        }
                     } catch (_e) {
                         params = {
                             text: postData.text

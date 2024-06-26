@@ -17,6 +17,7 @@ export const theme: Theme = {
     },
     accent: 'rgb(26, 115, 232)',
     graphql: '#e535ab',
+    batch_graphql: 'rgb(0, 255, 182)',
     phoenixLiveView: '#ee765d', // '#634872',
     oddRowBg: 'rgba(245, 245, 245)',
     inactiveTag: google.base00,
